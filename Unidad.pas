@@ -45,6 +45,7 @@ procedure abrir (var ctrl: ctlPersonas);
 procedure cerrar (var ctrl: ctlPersonas);
 
 procedure primero (var ctrl: ctlPersonas; var estado: integer);				
+//me queda la duda en que si se devuelve o un un p de tPersona
 
 procedure siguiente (var ctrl: ctlPersonas; var estado: integer);
 
@@ -117,7 +118,7 @@ begin
 	end
 	else
 	 	res := false;
-end;
+end;  
 
 
 procedure cargar (var ctrl: ctlPersonas; p : tPersona);						//Carga en los bloques y cuando está lleno lo vuelco en el archivo???
@@ -350,14 +351,12 @@ Begin
 	end;
 End;
 
-
-
+//procedure recuperar (var ctrl: ctlPersonas; dni: longword; var estado: integer);
 procedure eliminar (var ctrl: ctlPersonas; dni: longword; var estado: integer);
 var
    est: integer;
    resto:word;
    tamReg:byte;
-   per:	tPersona;
 Begin
      recuperar(ctrl,ctrl.p.dni,est);                  // llamo a recup para buscar el registro, si no lo encuentro sale directamente
      if est=1 then begin                                // encontro la persona
@@ -372,14 +371,14 @@ Begin
         seek(ctrl.arch,filepos(ctrl.arch)-1);           // se posiciona y vuelve a escribir en el bloque del archivo
         write(ctrl.arch,ctrl.b);                        // el registro sin la persona para modificar
         seek(ctrl.libres,filepos(ctrl.libres)-1);       // se posiciona y vuelve a escribir
-        write(ctrl.libres,ctrl.b);                      // en el archivo de espacios libres
+        write(ctrl.libres,ctrl.libre);                      // en el archivo de espacios libres
         estado:=1;                                      //retorna 1 si es verdadero
     end
     else
         estado:=0;                                      // retorna 0 si es falso
 End;
 
-
+//procedure recuperar (var ctrl: ctlPersonas; dni: longword; var estado: integer);
 procedure modificar (var ctrl: ctlPersonas; dni: longword; var estado: integer);
 var
    est: integer;
@@ -390,9 +389,11 @@ Begin
     per.dni:=ctrl.p.dni;                               // pienso que el los campos que son para actualizar estan el ctlperonas
     per.nombre:=ctrl.p.nombre;                         // si es asi, lo que hago es pasar lo que trajo el restro a per, asi si lo
     per.apellido:=ctrl.p.apellido;                     // cuando llamo a recuperar no lo pierdo
-    recuperar(ctrl.dni,per,est)                        // llamo a recup para buscar el registro, si no lo encuentro sale directamente
+    recuperar(ctrl,ctrl.p.dni,est)                     // llamo a recup para buscar el registro, si no lo encuentro sale directamente
     if est=1 then begin                                // encontro la persona
        resto:=Longword-ctrl.libre-arch.ib+1;           // Archivo auxiliar con la cantidad de bytes libres por bloque
+       //dejo estas tres linea porque tengo una duda en el ctrl.lpe,¿tiene sumado los "cebeceras", que dice cuantos bytes
+       //son los campos?
        inc(tamReg,sizeof(ctrl.p.dni));                 // van incrementando
        inc(tamReg,length(ctrl.p.nombre)+1);            // el valor de temReg
        inc(tamReg,length(ctrl.p.apellido)+1);          // para saber la cantidad de bytes
@@ -407,7 +408,7 @@ Begin
           seek(ctrl.arch,filepos(ctrl.arch)-1);        // se posiciona y vuelve a escribir en el bloque del archivo
           write(ctrl.arch,ctrl.b);                     // el registro sin la persona para modificar
           seek(ctrl.libres,filepos(ctrl.libres)-1);    // se posiciona y vuelve a escribir
-          write(ctrl.libres,ctrl.b);                   // en el archivo de espacios libres
+          write(ctrl.libres,ctrl.libre);               // en el archivo de espacios libres
           ctrl.p.dni=per.dni;                          // paso el registro
           ctrl.p.nombre=per.nombre;                    // que estaba en per, que seria el modificado
           ctrl.p.apellido=per.apellido;                // a arch
@@ -419,14 +420,13 @@ Begin
             seek(ctrl.arch,filepos(ctrl.arch)-1);      // se posiciona y vuelve a escribir en el bloque del archivo
             write(ctrl.arch,ctrl.b);                   // el registro sin la persona para modificar
             seek(ctrl.libres,filepos(ctrl.libres)-1);  // se posiciona y vuelve a escribir
-            write(ctrl.libres,ctrl.b);                 // en el archivo de espacios libres
+            write(ctrl.libres,ctrl.libre);             // en el archivo de espacios libres
        end;
        estado:=1;                                      //retorna 1 si es verdadero
     end
     else
         estado:=0;                                     // retorna 0 si es falso
 End;
-
 
 procedure respaldar (var ctrl: ctlPersonas);
 //var
