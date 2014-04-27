@@ -382,14 +382,27 @@ End;
 procedure modificar (var ctrl: ctlPersonas; dni: longword; var estado: integer);
 var
    est: integer;
-   resto:word;
-   tamReg:byte;
+  { resto:word;
+   tamReg:byte;}
    per:	tPersona;
 Begin
-    per.dni:=ctrl.p.dni;                               // pienso que el los campos que son para actualizar estan el ctlperonas
+	per.dni:=ctrl.p.dni;					// hacemos un
+    per.nombre:=ctrl.p.nombre;				// backup de los datos
+
+	eliminar(ctrl, dni, est);
+	if ( est ) then begin
+		ctrl.p.dni := per.dni;
+		ctrl.p.nombre := per.nombre;
+		cargar(ctrl);						// Lo ponemos al final para tener una mejor eficiencia en la escritura
+		estado := 1;
+	end else
+		estado := 0;
+	
+	
+    {per.dni:=ctrl.p.dni;                               // pienso que el los campos que son para actualizar estan el ctlperonas
     per.nombre:=ctrl.p.nombre;                         // si es asi, lo que hago es pasar lo que trajo el restro a per, asi si lo
     per.apellido:=ctrl.p.apellido;                     // cuando llamo a recuperar no lo pierdo
-    recuperar(ctrl,ctrl.p.dni,est)                     // llamo a recup para buscar el registro, si no lo encuentro sale directamente
+    recuperar(ctrl,ctrl.p.dni,est);                     // llamo a recup para buscar el registro, si no lo encuentro sale directamente
     if est=1 then begin                                // encontro la persona
        resto:=Longword-ctrl.libre-arch.ib+1;           // Archivo auxiliar con la cantidad de bytes libres por bloque
        //dejo estas tres linea porque tengo una duda en el ctrl.lpe,¿tiene sumado los "cebeceras", que dice cuantos bytes
@@ -425,7 +438,7 @@ Begin
        estado:=1;                                      //retorna 1 si es verdadero
     end
     else
-        estado:=0;                                     // retorna 0 si es falso
+        estado:=0;                                     // retorna 0 si es falso}
 End;
 
 procedure respaldar (var ctrl: ctlPersonas);
