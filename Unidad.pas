@@ -379,6 +379,9 @@ Begin
 	end 												// encontrarlo, devuelvo 0. No se encontraba el registro
 	else
 		estado := false;
+	writeln ('ctrl.libre: ',ctrl.libre);
+    writeln ('ctrl.ib: ', ctrl.ib);
+        //writeln ('Datos a mover: ', ctrl.lpe);
 end;
 
 procedure exportar (var ctrl: ctlPersonas; nomLogTXT : string);
@@ -448,14 +451,14 @@ Begin
         writeln ('ctrl.ib: ', ctrl.ib);
         writeln ('Datos a mover: ', ctrl.lpe);
         
-        cant := LongBLoque - ctrl.libre  - ctrl.ib;
-        move(ctrl.b[ctrl.ib], ctrl.b[ctrl.ib-ctrl.lpe], cant);   // Mueve los registros que estaban despues del eliminado
-        
-        writeln ('primer move');
-        
+        //No cambien estas dos líneas, sé que es ilegible, pero funciona; cuando nos veamos les explicaré
+        //cómo funciona (pero funciona).
+        cant := LongBLoque - ctrl.libre  - (ctrl.ib - 1);
+        move(ctrl.b[ctrl.ib], ctrl.b[ctrl.ib-ctrl.lpe], cant);   		// Mueve los registros que estaban despues del eliminado
+                
         ctrl.libre := ctrl.libre + ctrl.lpe;
         
-        seek(ctrl.arch,filepos(ctrl.arch)-1) 	;                      // se posiciona y vuelve a escribir en el bloque del archivo
+        seek(ctrl.arch,filepos(ctrl.arch)-1);	                      // se posiciona y vuelve a escribir en el bloque del archivo
         Blockwrite(ctrl.arch,ctrl.b,1);                                // el registro sin la persona para modificar
         seek(ctrl.libres,filepos(ctrl.libres)-1);                     // se posiciona y vuelve a escribir
         
@@ -481,6 +484,9 @@ Begin
 
 	eliminar(ctrl, est);
 	if ( est ) then begin
+		
+		ctrl.ib := LongBloque - (ctrl.libre - 1);
+	
 		ctrl.p.dni := per.dni;
 		ctrl.p.nombre := per.nombre;
 		cargar(ctrl);						// Lo ponemos al final para tener una mejor eficiencia en la escritura

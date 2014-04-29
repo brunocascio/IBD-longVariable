@@ -84,16 +84,16 @@ procedure eliminarPersonas;
     write('Ingrese dni. 0 para terminar: ');
     readln(archivo.p.dni);
     while (archivo.p.dni <> 0) do begin
-	abrir (archivo, E, nomb);
-      eliminar(archivo, resultado);
-	cerrar (archivo);
+		abrir (archivo, LE, nomb);
+		eliminar(archivo, resultado);
+		cerrar (archivo);
 
-      writeln('');
-      write('Eliminacion '); 
-      if (resultado) then
-        writeln('exitosa')
-      else
-        writeln('fallida');
+	  writeln('');
+	  write('Eliminacion '); 
+	  if (resultado) then
+		writeln('exitosa')
+	  else
+		writeln('fallida');
         
       write('Ingrese dni. 0 para terminar: ');
       readln(archivo.p.dni);
@@ -114,7 +114,6 @@ procedure imprimirPersonas;
     while (resultado) do begin
       writeln(archivo.p.dni);
       writeln(archivo.p.nombre);
-      
       writeln();
       siguiente(archivo, resultado);
     end;
