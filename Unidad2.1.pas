@@ -191,11 +191,6 @@ begin
 			seek (ctrl.libres, FileSize (ctrl.libres)-1);						//Lo mismo para el archivo de libres.
 			read (ctrl.libres, ctrl.libre);
 			ctrl.ib := LongBloque - (ctrl.libre - 1);							//inicializo el puntero de b para escritura.
-			
-			//Lo dejo posicionado en el lugar de donde levanté así lo actualiza cuando deba:
-			//Verificar que sea así siempre:
-			//seek (ctrl.libres,filepos(ctrl.libres)-1);
-			//seek (ctrl.arch,filepos (ctrl.arch)-1);
 		end; 
 	end;
 end;
@@ -203,11 +198,11 @@ end;
 
 procedure cerrar (var ctrl: ctlPersonas);
 begin
-	if (ctrl.estado = E) or (ctrl.estado = LE) then begin						//Verifico el estado del archivo antes de cerrar del todo.
+	if (ctrl.estado = E) or (ctrl.estado = LE) then begin					//Verifico el estado del archivo antes de cerrar del todo.
 		seek (ctrl.libres,filepos(ctrl.libres)-1);
 		seek (ctrl.arch,filepos (ctrl.arch)-1);
-		blockwrite (ctrl.arch, ctrl.b, 1);										//Escribo el último bloque en el archivo.
-		write (ctrl.libres, ctrl.libre);										//Escribo la cantidad de espacio libre en el archivo de espacios libres.
+		blockwrite (ctrl.arch, ctrl.b, 1);								//Escribo el último bloque en el archivo.
+		write (ctrl.libres, ctrl.libre);							 	//Escribo la cantidad de espacio libre en el archivo de espacios libres.
 	end;
 	ctrl.estado := C;
 	close (ctrl.arch);
@@ -244,12 +239,12 @@ function getPosSiguienteBloqueNoVacio (var a: tArchivoLibres): integer;
 procedure levantarBloque(var ctrl: ctlPersonas);
 
     begin
-        //levanto el bloque
-        blockRead(ctrl.arch, ctrl.b, 1);
+		//levanto el bloque
+		blockRead(ctrl.arch, ctrl.b, 1);
 
-        //leo espacios libres del bloque actual
-        seek(ctrl.libres, filePos(ctrl.arch) - 1);
-        read(ctrl.libres, ctrl.libre);
+		//leo espacios libres del bloque actual
+		seek(ctrl.libres, filePos(ctrl.arch) - 1);
+		read(ctrl.libres, ctrl.libre);
     end;
 
 procedure levantarBloqueEscritura(var ctrl: ctlPersonas);
@@ -304,10 +299,7 @@ procedure siguiente (var ctrl: ctlPersonas; var estado: boolean);
 var
     iBloqueValido : integer;
 Begin
-{	LeerPersona1(ctrl, res);		//Lee una persona desde donde estaba apuntando IB
-	if (res) then					//Si el resultado fue positivo, se devuelve el regitro persona 
-		estado := true				// y estado exitoso}
-		
+	
 	if (longBloque - ctrl.libre + 1 > ctrl.ib) then begin
 		leerPersona(ctrl.b, ctrl.ib, ctrl.p);
 	end
@@ -358,19 +350,14 @@ var
 Begin
 	encontrado := false;
 	primero(ctrl, est);
-	writeln(est);
 	if ( est ) then										
 	begin
 		while ((est) and (not encontrado)) do 		//mientras no encuentro la persona con el dni o no se termine el archivo
 		begin
-			writeln(ctrl.p.dni <> dni);
 			if ( ctrl.p.dni <> dni) then begin				//busco dni
-				writeln(ctrl.p.dni);
-				writeln(dni);
 				siguiente(ctrl, est)					//si no lo encuentro, sigo con el proximo registro
 			end else
 			begin
-				WRITELN('LA CONCHA DE TU MADRE');
 				encontrado := true;
 				empaquetar(ctrl);
 			end;
@@ -379,9 +366,6 @@ Begin
 	end 												// encontrarlo, devuelvo 0. No se encontraba el registro
 	else
 		estado := false;
-	writeln ('ctrl.libre: ',ctrl.libre);
-    writeln ('ctrl.ib: ', ctrl.ib);
-        //writeln ('Datos a mover: ', ctrl.lpe);
 end;
 
 procedure exportar (var ctrl: ctlPersonas; nomLogTXT : string);
@@ -441,16 +425,11 @@ var
    est: boolean;
    cant: longword;
 Begin
-	//ctrl.estado:= LE;
+
     recuperar(ctrl,ctrl.p.dni,est);                                     // llamo a recup para buscar el registro, si no lo encuentro sale directamente
     
     if ( est ) then begin                                              // encontro la persona
-		
-      // DatosAMover:= LongBloque - ctrl.libre - (ctrl.ib-1);                 // Cantidad de bytes que hay despues del del archivo encontrado
-        writeln ('ctrl.libre: ',ctrl.libre);
-        writeln ('ctrl.ib: ', ctrl.ib);
-        writeln ('Datos a mover: ', ctrl.lpe);
-        
+		        
         //No cambien estas dos líneas, sé que es ilegible, pero funciona; cuando nos veamos les explicaré
         //cómo funciona (pero funciona).
         cant := LongBLoque - ctrl.libre  - (ctrl.ib - 1);
@@ -463,7 +442,6 @@ Begin
         seek(ctrl.libres,filepos(ctrl.libres)-1);                     // se posiciona y vuelve a escribir
         
         write(ctrl.libres,ctrl.libre);                                // en el archivo de espacios libres
-        writeln ('Lo que me queda libre: ', ctrl.libre);
         
         estado:=true;                                                    //retorna 1 si es verdadero
     end
@@ -475,8 +453,6 @@ End;
 procedure modificar (var ctrl: ctlPersonas;  var estado: boolean);
 var
    est: boolean;
-  { resto:word;
-   tamReg:byte;}
    per:	tPersona;
 Begin
 	per.dni:=ctrl.p.dni;					// hacemos un
@@ -484,57 +460,13 @@ Begin
 
 	eliminar(ctrl, est);
 	if ( est ) then begin
-		
 		ctrl.ib := LongBloque - (ctrl.libre - 1);
-	
 		ctrl.p.dni := per.dni;
 		ctrl.p.nombre := per.nombre;
 		cargar(ctrl);						// Lo ponemos al final para tener una mejor eficiencia en la escritura
 		estado := true;
 	end else
 		estado := false;
-	
-	
-    {per.dni:=ctrl.p.dni;                               // pienso que el los campos que son para actualizar estan el ctlperonas
-    per.nombre:=ctrl.p.nombre;                         // si es asi, lo que hago es pasar lo que trajo el restro a per, asi si lo
-    per.apellido:=ctrl.p.apellido;                     // cuando llamo a recuperar no lo pierdo
-    recuperar(ctrl,ctrl.p.dni,est);                     // llamo a recup para buscar el registro, si no lo encuentro sale directamente
-    if est=1 then begin                                // encontro la persona
-       resto:=Longword-ctrl.libre-arch.ib+1;           // Archivo auxiliar con la cantidad de bytes libres por bloque
-       //dejo estas tres linea porque tengo una duda en el ctrl.lpe,¿tiene sumado los "cebeceras", que dice cuantos bytes
-       //son los campos?
-       inc(tamReg,sizeof(ctrl.p.dni));                 // van incrementando
-       inc(tamReg,length(ctrl.p.nombre)+1);            // el valor de temReg
-       inc(tamReg,length(ctrl.p.apellido)+1);          // para saber la cantidad de bytes
-       if resto>0 then                                 // chequea que no este al final, si no lo es puede moverse a la izquierda
-          move(ctrl.b[ib],ctrl.b[ib-temReg],resto);    // mueve los bytes que estan despues de la personaba buscada, sobreescribiendo
-       inc(ctrl.libre,temReg);                         // Incremento el tamaño de espacio libres
-       ctrl.ib:=  Longword-ctrl.libre+1;               // posiciono el indice de bloque en el primer lugar libre
-       inc(tamReg,sizeof(per.dni));                    // van incrementando
-       inc(tamReg,length(per.nombre)+1);               // el valor de temReg
-       inc(tamReg,length(per.apellido)+1);             // para saber la cantidad de bytes
-       if temReg> ctrl.libre then begin                // no entra en el bloque actual, asi que grabo el bloque e inserto el otro archivo normal en otro bloque
-          seek(ctrl.arch,filepos(ctrl.arch)-1);        // se posiciona y vuelve a escribir en el bloque del archivo
-          write(ctrl.arch,ctrl.b);                     // el registro sin la persona para modificar
-          seek(ctrl.libres,filepos(ctrl.libres)-1);    // se posiciona y vuelve a escribir
-          write(ctrl.libres,ctrl.libre);               // en el archivo de espacios libres
-          ctrl.p.dni=per.dni;                          // paso el registro
-          ctrl.p.nombre=per.nombre;                    // que estaba en per, que seria el modificado
-          ctrl.p.apellido=per.apellido;                // a arch
-          insertar(ctrl,est);                          // y llamo a insertar, para que lo inserte
-       end
-       else begin                                      // aca hay espacio suficiente para guardarlo en el bloque
-            move(per,ctrl.b[ctrl.ib],temReg);          // pongo en el bloque el registro
-            dec(ctrl.b,temReg);                        // decremento la cantidad de espacios libres
-            seek(ctrl.arch,filepos(ctrl.arch)-1);      // se posiciona y vuelve a escribir en el bloque del archivo
-            write(ctrl.arch,ctrl.b);                   // el registro sin la persona para modificar
-            seek(ctrl.libres,filepos(ctrl.libres)-1);  // se posiciona y vuelve a escribir
-            write(ctrl.libres,ctrl.libre);             // en el archivo de espacios libres
-       end;
-       estado:=1;                                      //retorna 1 si es verdadero
-    end
-    else
-        estado:=0;                                     // retorna 0 si es falso}
 End;
 
 

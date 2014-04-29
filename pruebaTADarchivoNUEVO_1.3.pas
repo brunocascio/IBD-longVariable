@@ -109,7 +109,7 @@ procedure imprimirPersonas;
     writeln('');
     writeln('ARCHIVO DE PERSONAS');
     writeln('');
-
+    
     primero(archivo, resultado);
     while (resultado) do begin
       writeln(archivo.p.dni);
@@ -146,7 +146,7 @@ procedure respald;
 var
   resultado: boolean;
 begin
-  //reset(archivo.archPersonas);
+
   respaldar(archivo, resultado);
   writeln('');
   writeln('Respaldo completo');
